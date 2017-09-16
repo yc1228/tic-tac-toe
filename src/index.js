@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import axios from 'axios';
 import './index.css';
 
 function Square(props) {
@@ -56,9 +57,13 @@ class Game extends React.Component {
             xIsPlayer: true
         };
         this.current = Array(9).fill(null);
+        this.computed = true;
     }
 
     handleClick(i) {
+        if (!this.computed) {
+            return;
+        }
         const history = this.state.history.slice(0, this.state.stepNumber + 1);
         const current = history[history.length - 1];
         const squares = current.squares.slice();
@@ -78,21 +83,22 @@ class Game extends React.Component {
         }
         this.current = squares;
 
-        let request = new XMLHttpRequest();
-        request.open('POST', 'http://localhost:9000/move', false);
-        request.send(JSON.stringify(this.current));
-        if (request.status === 200) {
-            this.setState({
-                history: history.concat([
-                    {
-                        squares: JSON.parse(request.responseText)
-                    }
-                ]),
-                stepNumber: history.length
+        this.computed = false;
+        axios.post('http://localhost:9000/move', JSON.stringify(this.current))
+            .then(function (response) {
+                this.setState({
+                    history: history.concat([
+                        {
+                            squares: response.data
+                        }
+                    ]),
+                    stepNumber: history.length
+                });
+                this.computed = true;
+            }.bind(this))
+            .catch(function (error) {
+                console.error(error);
             });
-        } else {
-            console.error("Oops! Something was wrong...");
-        }
     }
 
     jumpTo(step) {
