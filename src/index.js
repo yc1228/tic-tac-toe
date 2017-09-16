@@ -53,8 +53,9 @@ class Game extends React.Component {
                 }
             ],
             stepNumber: 0,
-            xIsNext: true
+            xIsPlayer: true
         };
+        this.current = Array(9).fill(null);
     }
 
     handleClick(i) {
@@ -64,22 +65,39 @@ class Game extends React.Component {
         if (calculateWinner(squares) || squares[i]) {
             return;
         }
-        squares[i] = this.state.xIsNext ? "X" : "O";
-        this.setState({
-            history: history.concat([
-                {
-                    squares: squares
-                }
-            ]),
-            stepNumber: history.length,
-            xIsNext: !this.state.xIsNext
-        });
+        if (this.state.xIsPlayer) {
+            squares[i] = this.state.xIsPlayer ? "X" : "O";
+            this.setState({
+                history: history.concat([
+                    {
+                        squares: squares
+                    }
+                ]),
+                stepNumber: history.length
+            });
+        }
+        this.current = squares;
+
+        let request = new XMLHttpRequest();
+        request.open('POST', 'http://localhost:9000/move', false);
+        request.send(JSON.stringify(this.current));
+        if (request.status === 200) {
+            this.setState({
+                history: history.concat([
+                    {
+                        squares: JSON.parse(request.responseText)
+                    }
+                ]),
+                stepNumber: history.length
+            });
+        } else {
+            console.error("Oops! Something was wrong...");
+        }
     }
 
     jumpTo(step) {
         this.setState({
             stepNumber: step,
-            xIsNext: (step % 2) === 0
         });
     }
 
@@ -101,7 +119,7 @@ class Game extends React.Component {
         if (winner) {
             status = "Winner: " + winner;
         } else {
-            status = "Next player: " + (this.state.xIsNext ? "X" : "O");
+            status = "Player: " + (this.state.xIsPlayer ? "X" : "O");
         }
 
         return (

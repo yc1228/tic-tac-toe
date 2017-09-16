@@ -1,17 +1,27 @@
 import tornado.ioloop
 import tornado.web
+import agent
 
 
-class MainHandler(tornado.web.RequestHandler):
+class BaseHandler(tornado.web.RequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "Content-Type")
+        self.set_header("Access-Control-Allow-Methods",
+                        "GET, POST, PUT, PATCH, DELETE")
+
+
+class MainHandler(BaseHandler):
     def get(self):
         self.write("Tic Tac Toe Artificial Intelligence Agent")
 
 
-class MoveHandler(tornado.web.RequestHandler):
+class MoveHandler(BaseHandler):
     def post(self):
-        board = self.get_argument("body"),
-        print(board)
-        self.write(board)
+        board = tornado.escape.json_decode(self.request.body)
+        move = agent.Agent(board).next_move()
+        self.write(tornado.escape.json_encode(move))
 
 
 def make_app():
