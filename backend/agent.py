@@ -28,3 +28,11 @@ class Agent(object):
             return 10 - depth
         else:
             return depth - 10
+
+    def game_over(self):
+        if self.board.count(None) == 0:
+            return True
+        elif Agent.check_winner(self) == 'X' or Agent.check_winner(self) == 'O':
+            return True
+        else:
+            return False
