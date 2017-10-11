@@ -36,3 +36,6 @@ class Agent(object):
             return True
         else:
             return False
+
+    def possible_moves(self):
+        return [i for i in range(len(self.board)) if self.board[i] is None]
