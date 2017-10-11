@@ -22,3 +22,9 @@ class Agent(object):
             if self.board[win[0]] == 'X' or self.board[win[0]] == 'O':
                 if self.board[win[0]] == self.board[win[1]] and self.board[win[1]] == self.board[win[2]]:
                     return self.board[win[0]]
+
+    def score(self, depth):
+        if Agent.check_winner(self) == self.player:
+            return 10 - depth
+        else:
+            return depth - 10
