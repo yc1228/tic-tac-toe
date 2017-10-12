@@ -4,23 +4,23 @@ import time
 class Agent(object):
     def __init__(self, board):
         self.board = board
-        self.choice = None
         if self.board.count('X') >= self.board.count('O'):
             self.player = 'O'
+            self.opponent = 'X'
         else:
             self.player = 'X'
+            self.opponent = 'O'
 
     def next_move(self):
-        time.sleep(2)
-        best = -100
-        Agent.minimax(self, 1, self.player, best)
+        # time.sleep(2)
+        _, choice = Agent.minimax(self, 1, self.player)
         if Agent.game_over(self) is True:
             print('Game Over!')
             return self.board
-        # print(self.choice)
-        self.board[self.choice] = self.player
+        self.board[choice] = self.player
+        # self.board[self.choice] = self.player
         print("Next Move: ")
-        #self.board[self.choice] = self.player
+        # self.board[self.choice] = self.player
         print(self.board)
         return self.board
 
@@ -35,8 +35,10 @@ class Agent(object):
     def score(self, depth):
         if Agent.check_winner(self) == self.player:
             return 10 - depth
-        else:
+        elif Agent.check_winner(self) == self.opponent:
             return depth - 10
+        else:
+            return 0
 
     def game_over(self):
         if self.board.count(None) == 0:
@@ -58,25 +60,30 @@ class Agent(object):
         else:
             return 'X'
 
-    def minimax(self, depth, player, best):
+    def minimax(self, depth, currPlayer):
         if Agent.game_over(self) is True:
-            return Agent.score(self, depth)
-            best = -1000
-        depth += 1
-        moves = Agent.possible_moves(self)
-        print(moves)
-        for m in moves:
-            Agent.make_move(self, m, player)
-            val = Agent.minimax(
-                self, depth, Agent.switch_player(self, player), best)
-            print(player, val, best)
+            return Agent.score(self, depth), None
+            depth = 1
+
+        if currPlayer == self.player:
+            best = -10
+            bestmove = -1
+        else:
+            best = 10
+            bestmove = -1
+
+        possiblemoves = Agent.possible_moves(self)
+        for m in possiblemoves:
+            Agent.make_move(self, m, currPlayer)
+            val, _ = Agent.minimax(
+                self, depth + 1, Agent.switch_player(self, currPlayer))
             Agent.make_move(self, m, None)
-            if player == self.player:
+            if currPlayer == self.player:
                 if val > best:
                     best = val
-                    self.choice = m
+                    bestmove = m
             else:
-                if val > best:
+                if val < best:
                     best = val
-                    self.choice = m
-        return best
+                    bestmove = m
+        return best, bestmove
