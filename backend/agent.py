@@ -12,15 +12,11 @@ class Agent(object):
             self.opponent = 'O'
 
     def next_move(self):
-        # time.sleep(2)
         _, choice = Agent.minimax(self, 1, self.player)
         if Agent.game_over(self) is True:
             print('Game Over!')
             return self.board
         self.board[choice] = self.player
-        # self.board[self.choice] = self.player
-        print("Next Move: ")
-        # self.board[self.choice] = self.player
         print(self.board)
         return self.board
 
@@ -29,7 +25,8 @@ class Agent(object):
                     [2, 4, 6], [0, 3, 6], [1, 4, 7], [2, 5, 8]]
         for win in winstate:
             if self.board[win[0]] == 'X' or self.board[win[0]] == 'O':
-                if self.board[win[0]] == self.board[win[1]] and self.board[win[1]] == self.board[win[2]]:
+                if self.board[win[0]] == self.board[win[1]] \
+                        and self.board[win[1]] == self.board[win[2]]:
                     return self.board[win[0]]
 
     def score(self, depth):
@@ -60,30 +57,27 @@ class Agent(object):
         else:
             return 'X'
 
-    def minimax(self, depth, currPlayer):
+    def minimax(self, depth, currplayer):
         if Agent.game_over(self) is True:
             return Agent.score(self, depth), None
-            depth = 1
-
-        if currPlayer == self.player:
-            best = -10
+        if currplayer == self.player:
+            bestval = -10
             bestmove = -1
         else:
-            best = 10
+            bestval = 10
             bestmove = -1
-
         possiblemoves = Agent.possible_moves(self)
         for m in possiblemoves:
-            Agent.make_move(self, m, currPlayer)
+            Agent.make_move(self, m, currplayer)
             val, _ = Agent.minimax(
-                self, depth + 1, Agent.switch_player(self, currPlayer))
+                self, depth + 1, Agent.switch_player(self, currplayer))
             Agent.make_move(self, m, None)
-            if currPlayer == self.player:
-                if val > best:
-                    best = val
+            if currplayer == self.player:
+                if val > bestval:
+                    bestval = val
                     bestmove = m
             else:
-                if val < best:
-                    best = val
+                if val < bestval:
+                    bestval = val
                     bestmove = m
-        return best, bestmove
+        return bestval, bestmove
